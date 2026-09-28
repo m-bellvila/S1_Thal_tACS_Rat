@@ -3,7 +3,7 @@ netParams.py
 
 High-level specifications for S1 network model using NetPyNE
 
-Contributors: salvadordura@gmail.com, fernandodasilvaborges@gmail.com
+Contributors: salvadordura@gmail.com, fernandodasilvaborges@gmail.com, monica.bellvila@mail.utoronto.ca
 """
 
 from netpyne import specs
