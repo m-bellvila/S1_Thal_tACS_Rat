@@ -112,7 +112,7 @@ def make_extracellular_stimuli(cell):
     for c, (i, j) in zip(coeffs, powers):
         potential_vals += c * (A_b**i) * (y_b**j)
         
-    potential_vals = potential_vals*1000*scalestim #convert V to mV
+    potential_vals = potential_vals*1000*scalestim #convert V to mV, multiply by morphological scaling factor
     
     v_cell_ext[:, :] = potential_vals.reshape(1,n_tsteps)
     insert_v_ext(cell, v_cell_ext, t)
