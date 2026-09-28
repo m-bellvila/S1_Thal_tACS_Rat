@@ -9,7 +9,7 @@ Usage:
 MPI usage:
     mpiexec -n 4 nrniv -python -mpi init.py
 
-Contributors: salvadordura@gmail.com, fernandodasilvaborges@gmail.com
+Contributors: salvadordura@gmail.com, fernandodasilvaborges@gmail.com, monica.bellvila@mail.utoronto.ca
 """
 
 import matplotlib; matplotlib.use('Agg')  # to avoid graphics error in servers
@@ -67,73 +67,69 @@ sim.setupRecording()              			# setup variables to record for each cell (
 sim.net.defineCellShapes()
 
 
-# def insert_v_ext(cell, v_ext, t_ext):
-#     cell.t_ext = neuron.h.Vector(t_ext)
-#     cell.v_ext = []
-#     for v in v_ext:
-#         cell.v_ext.append(neuron.h.Vector(v))
 
-#     # play v_ext into e_extracellular reference
-#     i = 0
-#     cell.v_ext[i].play(cell.secs['soma']['hObj'](
-#         0.5)._ref_e_extracellular, cell.t_ext)
+def insert_v_ext(cell, v_ext, t_ext):
+    cell.t_ext = neuron.h.Vector(t_ext)
+    cell.v_ext = []
+    for v in v_ext:
+        cell.v_ext.append(neuron.h.Vector(v))
 
-# # Coefficients derived from regression of potential values across depth derived from the interpolation 
-# #of potential artefacts in experimental electrophysiological recordings against Sim4Life electic fields across 
-# #4 amplitudes tested (50, 100, 200, 400uA) 
-# powers = [(0, 0), (0, 1), (0, 2), (0, 3), (1, 0), (1, 1), (1, 2), (1, 3)]
-# coeffs = [ 5.86454142e-05, -4.16641407e-02,  8.98017320e+00, -4.83143435e+02,
-#         9.68157164e-06,  9.19035722e-03, -1.98086390e+00,  1.06572684e+02]
+    # play v_ext into e_extracellular reference
+    i = 0
+    cell.v_ext[i].play(cell.secs['soma']['hObj'](
+        0.5)._ref_e_extracellular, cell.t_ext)
+
+# Coefficients derived from regression of potential values across depth derived from the interpolation 
+#of potential artefacts in experimental electrophysiological recordings against Sim4Life electic fields across 
+#4 amplitudes tested (50, 100, 200, 400uA) 
+powers = [(0, 0), (0, 1), (0, 2), (0, 3), (1, 0), (1, 1), (1, 2), (1, 3)]
+coeffs = [ 5.86454142e-05, -4.16641407e-02,  8.98017320e+00, -4.83143435e+02,
+        9.68157164e-06,  9.19035722e-03, -1.98086390e+00,  1.06572684e+02]
 
 
-# def make_extracellular_stimuli(cell):
-#     """ Function to calculate and apply external potential"""
+def make_extracellular_stimuli(cell):
+    """ Function to calculate and apply external potential"""
 
-#     stimstart = cfg.ACSparams['stimstart']
-#     stimend = cfg.ACSparams['stimend']
-#     stimdif = stimend-stimstart
+    stimstart = cfg.ACSparams['stimstart']
+    stimend = cfg.ACSparams['stimend']
+    stimdif = stimend-stimstart
 
-#     # MAKING THE EXTERNAL FIELD
-#     n_tsteps = int(stimdif / cfg.dt + 1)
-#     n_start = int(stimstart/cfg.dt)
-#     n_end = int(stimend/cfg.dt + 1)
-#     t = np.arange(start=n_start, stop=n_end) * cfg.dt
-#     pulse = cfg.ACSparams['amp'] * \
-#         np.sin(2 * np.pi * cfg.ACSparams['freq'] * t / 1000)
+    # MAKING THE EXTERNAL FIELD
+    n_tsteps = int(stimdif / cfg.dt + 1)
+    n_start = int(stimstart/cfg.dt)
+    n_end = int(stimend/cfg.dt + 1)
+    t = np.arange(start=n_start, stop=n_end) * cfg.dt
+    pulse = cfg.ACSparams['amp'] * \
+        np.sin(2 * np.pi * cfg.ACSparams['freq'] * t / 1000)
     
-#     A = np.asarray(pulse.reshape(1, n_tsteps))
-#     y =  abs(cell.getSomaPos()[1])/1000000 #initial cell depth is in um, convert to m for calculation
+    A = np.asarray(pulse.reshape(1, n_tsteps))
+    y =  abs(cell.getSomaPos()[1])/1000000 #initial cell depth is in um, convert to m for calculation
     
-#     v_cell_ext = np.zeros((1, n_tsteps))
+    v_cell_ext = np.zeros((1, n_tsteps))
     
-#     A_b, y_b = np.broadcast_arrays(A, y)
-#     potential_vals = np.zeros_like(A_b, dtype = float)
-#     for c, (i, j) in zip(coeffs, powers):
-#         potential_vals += c * (A_b**i) * (y_b**j)
+    A_b, y_b = np.broadcast_arrays(A, y)
+    potential_vals = np.zeros_like(A_b, dtype = float)
+    for c, (i, j) in zip(coeffs, powers):
+        potential_vals += c * (A_b**i) * (y_b**j)
         
-#     potential_vals = potential_vals*1000*scalestim #convert V to mV
+    potential_vals = potential_vals*1000*scalestim #convert V to mV
     
-#     v_cell_ext[:, :] = potential_vals.reshape(1,n_tsteps)
-#     insert_v_ext(cell, v_cell_ext, t)
+    v_cell_ext[:, :] = potential_vals.reshape(1,n_tsteps)
+    insert_v_ext(cell, v_cell_ext, t)
     
-#     return potential_vals, pulse
+    return potential_vals, pulse
 
 
-# if cfg.ACSparams['include'] == True:
-#     for c,metype in enumerate(sim.net.cells):
-#         if 'presyn' not in metype.tags['pop']:
-#             if '_'.join(metype.tags['pop'].split('_',2)[0:2]) in cfg.Ipops:
-#                 scalestim = cfg.ACSparams['Inh_scale']
-#                 ext_field, pulse = make_extracellular_stimuli(sim.net.cells[c])
-#             elif '_'.join(metype.tags['pop'].split('_',2)[0:2]) in cfg.Epops:
-#                 scalestim = cfg.ACSparams['Exc_scale']
-#                 ext_field, pulse = make_extracellular_stimuli(sim.net.cells[c])
+if cfg.ACSparams['include'] == True:
+    for c,metype in enumerate(sim.net.cells):
+        if 'presyn' not in metype.tags['pop']:
+            if '_'.join(metype.tags['pop'].split('_',2)[0:2]) in cfg.Ipops:
+                scalestim = cfg.ACSparams['Inh_scale']
+                ext_field, pulse = make_extracellular_stimuli(sim.net.cells[c])
+            elif '_'.join(metype.tags['pop'].split('_',2)[0:2]) in cfg.Epops:
+                scalestim = cfg.ACSparams['Exc_scale']
+                ext_field, pulse = make_extracellular_stimuli(sim.net.cells[c])
 
-# ##Uniform extracellular stim
-# #for c,metype in enumerate(sim.net.cells):
-# #    if 'presyn' not in metype.tags['pop']:
-# #        scalestim = 1.0
-# #        ext_field, pulse = make_extracellular_stimuli(sim.net.cells[c])
 
 
             
