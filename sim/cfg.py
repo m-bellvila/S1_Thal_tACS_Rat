@@ -4,7 +4,7 @@ cfg.py
 Simulation configuration for S1 model (using NetPyNE)
 This file has sim configs as well as specification for parameterized values in netParams.py 
 
-Contributors: salvadordura@gmail.com, fernandodasilvaborges@gmail.com
+Contributors: salvadordura@gmail.com, fernandodasilvaborges@gmail.com, monica.bellvila@mail.utoronto.ca
 """
 
 from netpyne import specs
